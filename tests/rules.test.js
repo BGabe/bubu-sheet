@@ -181,3 +181,22 @@ test('adjustHp: damage eats temp first, healing caps at max, never below 0', () 
   adjustHp(hp, -100);
   assert.equal(hp.cur, 0);
 });
+
+import { useFeature, regainFeature } from '../js/rules.js';
+
+test('useFeature spends one use and refuses at zero', () => {
+  const f = { bi: { cur: 1, max: 4 } };
+  assert.equal(useFeature(f, 'bi'), true);
+  assert.equal(f.bi.cur, 0);
+  assert.equal(useFeature(f, 'bi'), false);
+  assert.equal(f.bi.cur, 0);
+  assert.equal(useFeature(f, 'missing'), false);
+});
+
+test('regainFeature adds one use up to max and refuses when full', () => {
+  const f = { bi: { cur: 3, max: 4 } };
+  assert.equal(regainFeature(f, 'bi'), true);
+  assert.equal(f.bi.cur, 4);
+  assert.equal(regainFeature(f, 'bi'), false);
+  assert.equal(f.bi.cur, 4);
+});

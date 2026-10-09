@@ -135,6 +135,13 @@ function resultCard(sel, res, state, ctx, redraw) {
     const crit = res.crit;
     follow.push(h('button', { class: 'btn primary', onClick: () => damageFor(sel, state, crit, S.spellKey, ctx, redraw) }, 'Roll damage →'));
   }
+  if (state.heroicInspiration) {
+    follow.push(h('button', { class: 'btn', onClick: () => {
+      resetDice(); // before the update: the store update re-renders immediately
+      ctx.store.update((st) => { st.heroicInspiration = false; });
+      ctx.toast('DM Inspiration spent — roll again and keep the new result');
+    } }, '★ Spend Inspiration to reroll'));
+  }
   if (sel.id === 'death' && res.used === 20) {
     follow.push(h('button', { class: 'btn', onClick: () => { ctx.store.update((st) => { st.hp.cur = Math.max(st.hp.cur, 1); }); ctx.toast('Back up with 1 HP'); } }, 'Set HP to 1'));
   }

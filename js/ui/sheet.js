@@ -2,6 +2,7 @@ import { h, fmt, stepper, pips, segmented, modal, confirmDialog } from '../dom.j
 import { CHAR, FEATURES, ABILITY_NAMES } from '../data.js';
 import { ABILITIES, abilityMod, profBonus, adjustHp, shortRest, longRest, applyMisc, skillBonus } from '../rules.js';
 import { buildChecks } from '../checks.js';
+import { inspirationButtons } from './inspiration.js';
 
 let editSkills = false;
 
@@ -58,6 +59,11 @@ export function render(root, ctx) {
     h('h2', null, 'Resources'),
     h('div', { class: 'stack' },
       resRow('Bardic Inspiration (d8)', pips(bi.cur, bi.max, (v) => store.update((st) => { st.features.bardicInspiration.cur = v; })), `${bi.cur}/${bi.max} · short rest`),
+      inspirationButtons(ctx),
+      h('button', {
+        class: 'btn block' + (s.heroicInspiration ? ' primary' : ''), 'aria-pressed': s.heroicInspiration ? 'true' : 'false',
+        onClick: () => store.update((st) => { st.heroicInspiration = !st.heroicInspiration; }),
+      }, s.heroicInspiration ? '★ DM Inspiration ready — reroll any roll. Tap to spend' : '☆ DM Inspiration: none. Tap when the DM grants it'),
       [1, 2, 3].map((l) => resRow(`Bard slot — level ${l}`,
         pips(s.slots.bard[l].cur, s.slots.bard[l].max, (v) => store.update((st) => { st.slots.bard[l].cur = v; })), `${s.slots.bard[l].cur}/${s.slots.bard[l].max}`)),
       resRow('Pact slot — level 1', pips(s.slots.pact.cur, s.slots.pact.max, (v) => store.update((st) => { st.slots.pact.cur = v; })), `${s.slots.pact.cur}/${s.slots.pact.max} · short rest`),
@@ -110,8 +116,9 @@ export function render(root, ctx) {
   root.append(h('div', { class: 'page' },
     h('div', { class: 'muted center small' }, CHAR.summary),
     h('div', { class: 'cols' },
-      h('div', { class: 'stack' }, hpCard, combatCard, resources, featureStrip(FEATURES)),
-      h('div', { class: 'stack' }, abilities, saves, skills))));
+      h('div', { class: 'stack' }, hpCard, combatCard, resources),
+      h('div', { class: 'stack' }, abilities, saves, skills)),
+    featureStrip()));
 }
 
 function resRow(label, control, right) {
@@ -121,13 +128,33 @@ function resRow(label, control, right) {
 }
 
 function featureStrip() {
+  const group = (title, items) => [
+    h('h3', { style: 'margin-top:8px' }, title),
+    h('ul', { style: 'margin:0;padding-left:1.1em' }, items.map((t) => h('li', null, t))),
+  ];
   return h('section', { class: 'card' },
-    h('h3', null, 'Quick reminders'),
-    h('ul', { style: 'margin:0;padding-left:1.1em' },
-      h('li', null, 'Persuasion / Deception: d20 of 9 or less counts as 10 (Roll tab applies it).'),
-      h('li', null, 'Poison: advantage on saves, resistance to the damage.'),
-      h('li', null, 'Dark One\'s Blessing: drop an enemy to 0 HP → +5 temp HP.'),
-      h('li', null, 'Concentration: if you take damage, make a CON save, DC 10 or half the damage.')));
+    h('h2', null, 'Quick reminders'),
+    ...group('Mountain Dwarf', [
+      'Darkvision 60 ft: dim light counts as bright, darkness as dim (no colour in darkness).',
+      'Dwarven Resilience: advantage on saves against poison, resistance to poison damage.',
+      'Stonecunning: History checks about stonework count as proficient with double proficiency bonus.',
+      'Dwarven Combat Training: proficient with battleaxe, handaxe, light hammer and warhammer.',
+      'Dwarven Armor Training: proficient with light and medium armor.',
+      'Dwarven Toughness: +1 hit point per level.',
+      'Speed 25 ft, and heavy armor never slows you.',
+      "Tool proficiency: Brewer's Supplies. Languages: Common and Dwarvish.",
+    ]),
+    ...group('Bard', [
+      'Bardic Inspiration (d8): bonus action, 60 ft, they keep it for 10 minutes. Back on a short rest.',
+      'Jack of All Trades: +1 to checks you are not proficient in, initiative included.',
+      'Silver Tongue: Persuasion / Deception d20 of 9 or less counts as 10 (the Roll tab applies it).',
+      'Song of Rest: allies who spend Hit Dice on a short rest heal an extra 1d6.',
+    ]),
+    ...group('Warlock and general', [
+      "Dark One's Blessing: drop an enemy to 0 HP and gain 5 temp HP.",
+      'Pact slot comes back on a short rest.',
+      'Concentration: if you take damage, make a CON save, DC 10 or half the damage (higher).',
+    ]));
 }
 
 function hpModal(ctx) {

@@ -241,6 +241,7 @@ export function defaultState() {
     },
     features: trackers(),
     concentration: null,
+    heroicInspiration: false, // the DM-granted kind
     skillMisc: Object.fromEntries(Object.entries(CHAR.skills).map(([k, v]) => [k, v.misc])),
     coin: { pp: 0, gp: 80, sp: 0, cp: 0 },
     inventory: ITEMS.map((i) => ({ ...i })),

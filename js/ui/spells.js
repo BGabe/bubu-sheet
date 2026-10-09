@@ -1,6 +1,7 @@
 import { h, pips, modal, segmented } from '../dom.js';
 import { CHAR, SPELLS, FEATURES } from '../data.js';
 import { abilityMod, profBonus, spellEffect, spendSlot } from '../rules.js';
+import { inspirationButtons } from './inspiration.js';
 
 const open = new Set(); // expanded spell / feature keys survive re-renders
 let filter = 'all';
@@ -147,6 +148,7 @@ function featureCard(f, ctx) {
     isOpen ? h('div', { class: 'spell-body' },
       tr ? h('div', { class: 'meta' }, h('span', { class: 'badge' }, `${tr.cur}/${tr.max}`), h('span', { class: 'badge' }, tr.rest === 'short' ? 'Short or long rest' : 'Long rest')) : null,
       h('p', null, f.text),
+      f.key === 'bardicInspiration' ? inspirationButtons(ctx) : null,
       h('div', { class: 'row gap wrap' },
         f.spends ? h('button', { class: 'btn', onClick: () => {
           if (s.features[f.spends].cur <= 0) return ctx.toast('No Bardic Inspiration left');

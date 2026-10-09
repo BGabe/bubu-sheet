@@ -117,3 +117,19 @@ export function spellEffect(spell, castLevel, charLevel) {
   }
   return { kind: e.kind, type: e.type || '', text: `${text} ${e.type || ''}`.trim(), addMod: e.addMod || null };
 }
+
+/** Spend one use of a tracked feature. Returns false if none left. */
+export function useFeature(features, key) {
+  const f = features[key];
+  if (!f || f.cur <= 0) return false;
+  f.cur -= 1;
+  return true;
+}
+
+/** Regain one use of a tracked feature (e.g. Font of Inspiration). Returns false if already full. */
+export function regainFeature(features, key) {
+  const f = features[key];
+  if (!f || f.cur >= f.max) return false;
+  f.cur += 1;
+  return true;
+}

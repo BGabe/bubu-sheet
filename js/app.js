@@ -64,6 +64,7 @@ function renderTop() {
     h('div', { class: 'top-chips' },
       h('span', { class: 'chip' }, `AC ${ac}`),
       h('span', { class: 'chip' }, `Slots ${slotBits} · P:${s.slots.pact.cur}`),
+      s.heroicInspiration ? h('span', { class: 'chip warn' }, '★ Inspiration') : null,
       s.concentration ? h('span', { class: 'chip warn' }, '◎ Concentrating') : null));
 }
 
