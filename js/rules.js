@@ -95,3 +95,25 @@ export function longRest(state) {
   for (const f of Object.values(state.features)) f.cur = f.max;
   state.concentration = null;
 }
+
+/**
+ * Damage/healing description for a spell cast at castLevel by a character of charLevel.
+ * Returns null for spells without a dice effect.
+ * Result: { kind, type, text, addMod } — addMod is an ability key to add (e.g. 'cha') or null.
+ */
+export function spellEffect(spell, castLevel, charLevel) {
+  const e = spell.effect;
+  if (!e) return null;
+  let text;
+  if (e.scale === 'cantrip') {
+    const n = 1 + (charLevel >= 5) + (charLevel >= 11) + (charLevel >= 17);
+    text = `${n}${e.die}`;
+  } else if (e.scale === 'beams') {
+    const n = 1 + (charLevel >= 5) + (charLevel >= 11) + (charLevel >= 17);
+    text = `${n} beam${n > 1 ? 's' : ''} × 1${e.die}`;
+  } else {
+    const n = e.count + Math.max(0, castLevel - spell.level) * (e.perLevel || 0);
+    text = `${n}${e.die}`;
+  }
+  return { kind: e.kind, type: e.type || '', text: `${text} ${e.type || ''}`.trim(), addMod: e.addMod || null };
+}
