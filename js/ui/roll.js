@@ -8,6 +8,7 @@ const S = {
   tab: 'check', // 'check' | 'dmg'
   group: 'Skills',
   sel: null,
+  picking: false, // true while the full check list is open
   mode: 'normal',
   d: [null, null],
   extra: null,
@@ -22,7 +23,7 @@ function applyParams(params, state) {
   if (params.pick) {
     const c = buildChecks(state).find((x) => x.id === params.pick);
     if (c) {
-      S.tab = 'check'; S.sel = c.id; S.group = c.group; S.mode = 'normal'; resetDice();
+      S.tab = 'check'; S.sel = c.id; S.group = c.group; S.picking = false; S.mode = 'normal'; resetDice();
       S.spellKey = params.spell || null;
     }
   }
@@ -67,12 +68,21 @@ function checkView(state, redraw, ctx) {
     h('div', { class: 'row wrap', style: 'margin-bottom:10px' },
       segmented(GROUPS.map((g) => [g, g]), S.group, (g) => { S.group = g; redraw(); })),
     h('div', { class: 'chips' }, list.map((c) =>
-      h('button', { class: 'pick' + (sel && sel.id === c.id ? ' on' : ''), onClick: () => { S.sel = c.id; S.mode = 'normal'; resetDice(); S.spellKey = null; redraw(); } },
+      h('button', { class: 'pick' + (sel && sel.id === c.id ? ' on' : ''), onClick: () => { S.sel = c.id; S.picking = false; S.mode = 'normal'; resetDice(); S.spellKey = null; redraw(); } },
         h('span', null, c.label), h('span', { class: 'bonus' }, fmt(c.base))))));
 
   if (!sel) {
     return h('div', { class: 'stack' }, chooser, h('div', { class: 'empty' }, 'Pick what you are rolling, roll your physical dice, then tap the numbers.'));
   }
+  // Once something is picked the long list collapses so the result stays on screen.
+  const picker = S.picking
+    ? chooser
+    : h('section', { class: 'card row between' },
+      h('div', null, h('strong', { style: 'font-size:1.2rem' }, sel.label), S.spellKey ? h('div', { class: 'muted small' }, SPELLS.find((s) => s.key === S.spellKey)?.name) : null,
+        sel.note ? h('div', { class: 'muted small' }, sel.note) : null),
+      h('div', { class: 'row gap' },
+        h('span', { class: 'big' }, fmt(sel.base)),
+        h('button', { class: 'btn', onClick: () => { S.picking = true; S.group = sel.group; redraw(); } }, 'Change')));
 
   const need = S.mode === 'normal' ? 1 : 2;
   const dice = S.d.slice(0, need);
@@ -86,12 +96,12 @@ function checkView(state, redraw, ctx) {
   }
 
   const setDie = (i) => (v) => { S.d[i] = v; redraw(); };
+  const outcome = res ? resultCard(sel, res, state, ctx, redraw)
+    : h('section', { class: 'result' }, h('div', { class: 'muted small' }, 'TOTAL'), h('div', { class: 'total' }, '–'),
+      h('div', { class: 'parts' }, `Tap the number${need > 1 ? 's' : ''} you rolled`));
   const panel = h('section', { class: 'card stack' },
-    h('div', { class: 'row between wrap' },
-      h('div', null, h('h2', null, sel.label), S.spellKey ? h('div', { class: 'muted small' }, SPELLS.find((s) => s.key === S.spellKey)?.name) : null),
-      h('div', { class: 'big' }, fmt(sel.base))),
-    sel.note ? h('div', { class: 'muted small' }, sel.note) : null,
     sel.kind !== 'death' ? segmented([['normal', 'Normal'], ['adv', 'Advantage'], ['dis', 'Disadvantage']], S.mode, (m) => { S.mode = m; redraw(); }) : null,
+    outcome,
     h('div', null, h('div', { class: 'muted small' }, need === 1 ? 'Your d20' : 'First d20'), keypad(20, S.d[0], setDie(0))),
     need === 2 ? h('div', null, h('div', { class: 'muted small' }, 'Second d20'), keypad(20, S.d[1], setDie(1))) : null,
     sel.kind !== 'death' ? h('div', null,
@@ -99,7 +109,7 @@ function checkView(state, redraw, ctx) {
       keypad(12, S.extra, (v) => { S.extra = v; redraw(); }, 'dim')) : null,
     h('div', { class: 'row end' }, h('button', { class: 'btn small', onClick: () => { resetDice(); redraw(); } }, 'Clear dice')));
 
-  return h('div', { class: 'stack' }, chooser, panel, res ? resultCard(sel, res, state, ctx, redraw) : h('div', { class: 'empty' }, `Tap the number${need > 1 ? 's' : ''} you rolled.`));
+  return h('div', { class: 'stack' }, picker, S.picking ? null : panel);
 }
 
 function resultCard(sel, res, state, ctx, redraw) {
