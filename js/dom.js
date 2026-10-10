@@ -33,10 +33,27 @@ export function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+let dismissActive = null; // closes the open dialog without touching history
+
+/** Called by the router on Back: closes an open dialog. Returns true if one was open. */
+export function closeModalFromBack() {
+  if (!dismissActive) return false;
+  dismissActive();
+  return true;
+}
+
 /** Show a modal. build(close) returns the content node. */
 export function modal(title, build) {
   const root = document.getElementById('modal-root');
-  const close = () => { root.replaceChildren(); document.body.classList.remove('modal-open'); };
+  // One history entry per open dialog so Android Back closes it instead of leaving the app.
+  if (!(history.state && history.state.modal)) history.pushState({ ...(history.state || {}), modal: true }, '');
+  const dismiss = () => { root.replaceChildren(); document.body.classList.remove('modal-open'); dismissActive = null; };
+  const close = () => {
+    dismiss();
+    // Next tick, so a dialog opened straight after this one can reuse the same entry.
+    setTimeout(() => { if (!dismissActive && history.state && history.state.modal) history.back(); }, 0);
+  };
+  dismissActive = dismiss;
   const sheet = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
     h('div', { class: 'modal-head' },
       h('h2', null, title),

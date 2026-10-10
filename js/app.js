@@ -1,6 +1,6 @@
 import { createStore } from './store.js';
 import { CHAR } from './data.js';
-import { h, toast } from './dom.js';
+import { h, toast, closeModalFromBack } from './dom.js';
 import * as sheet from './ui/sheet.js';
 import * as roll from './ui/roll.js';
 import * as spells from './ui/spells.js';
@@ -39,7 +39,13 @@ const ctx = {
   store,
   char: CHAR,
   go(id, p = {}) {
-    current = TABS.find((t) => t.id === id) || TABS[0];
+    const next = TABS.find((t) => t.id === id) || TABS[0];
+    if (next.id !== current.id) {
+      // Replace instead of push when a dialog's entry is on top, so Back does not land on a stale dialog.
+      const entry = { tab: next.id };
+      if (history.state && history.state.modal) history.replaceState(entry, ''); else history.pushState(entry, '');
+    }
+    current = next;
     params = p;
     writeTab(current.id);
     view.scrollTop = 0;
@@ -63,7 +69,7 @@ function renderTop() {
         h('div', { class: 'hptext' }, `${s.hp.cur}/${s.hp.max}${s.hp.temp ? ` +${s.hp.temp}` : ''} HP`))),
     h('div', { class: 'top-chips' },
       h('span', { class: 'chip' }, `AC ${ac}`),
-      h('span', { class: 'chip' }, `Slots ${slotBits} · P:${s.slots.pact.cur}`),
+      h('span', { class: 'chip chip-slots' }, `Slots ${slotBits} · P:${s.slots.pact.cur}`),
       s.heroicInspiration ? h('span', { class: 'chip warn' }, '★ Inspiration') : null,
       s.concentration ? h('span', { class: 'chip warn' }, '◎ Concentrating') : null));
 }
@@ -89,6 +95,12 @@ function renderAll() {
 }
 
 store.subscribe(renderAll);
+history.replaceState({ tab: current.id }, '');
+window.addEventListener('popstate', (e) => {
+  if (closeModalFromBack()) return; // Back closes a dialog first
+  const tab = e.state && TABS.find((t) => t.id === e.state.tab);
+  if (tab && tab.id !== current.id) { current = tab; writeTab(tab.id); renderAll(); }
+});
 renderAll();
 
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});

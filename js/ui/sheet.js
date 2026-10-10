@@ -26,9 +26,9 @@ export function render(root, ctx) {
         h('div', { class: 'muted small' }, 'TEMP HP'),
         stepper({ value: s.hp.temp, min: 0, label: 'Temp HP', onChange: (v) => store.update((st) => { st.hp.temp = v; }) }))),
     s.hp.cur === 0 ? h('p', { class: 'badge bad' }, 'Down — roll death saves on the Roll tab') : null,
-    h('div', { class: 'row wrap', style: 'margin-top:10px' },
+    h('div', { class: 'hp-row' },
       [-10, -5, -1, 1, 5, 10].map((d) =>
-        h('button', { class: 'btn grow' + (d < 0 ? ' danger' : ''), onClick: () => hp(d) }, d > 0 ? `+${d}` : `−${-d}`))),
+        h('button', { class: 'btn' + (d < 0 ? ' danger' : ''), onClick: () => hp(d) }, d > 0 ? `+${d}` : `−${-d}`))),
     h('div', { class: 'row end gap', style: 'margin-top:8px' },
       h('button', { class: 'btn small', onClick: () => hpModal(ctx) }, 'Exact amount…'),
       h('button', { class: 'btn small', onClick: () => maxHpModal(ctx) }, 'Max HP…')));

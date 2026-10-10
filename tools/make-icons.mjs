@@ -44,7 +44,7 @@ const inHex = (x, y, r) => {
   return ay <= r && ax * Math.sqrt(3) / 2 + ay / 2 <= r * Math.sqrt(3) / 2 + 0.0001 * 0 && ax <= r * Math.sqrt(3) / 2;
 };
 
-function render(size) {
+function render(size, hexR = 0.4, cell = 0.07) {
   const SS = 3;
   return png(size, (px, py) => {
     let rs = 0, gs = 0, bs = 0;
@@ -52,10 +52,9 @@ function render(size) {
       const x = (px + (sx + 0.5) / SS) / size - 0.5;
       const y = (py + (sy + 0.5) / SS) / size - 0.5;
       let c = BG;
-      if (inHex(x, y, 0.4)) {
+      if (inHex(x, y, hexR)) {
         c = GOLD;
         // letter B, 5x7 grid centred, cell = 0.07
-        const cell = 0.07;
         const gx = Math.floor((x + 2.5 * cell) / cell), gy = Math.floor((y + 3.5 * cell) / cell);
         if (gx >= 0 && gx < 5 && gy >= 0 && gy < 7 && B[gy][gx] === '1') c = DARK;
       }
@@ -68,4 +67,6 @@ function render(size) {
 
 mkdirSync('icons', { recursive: true });
 for (const s of [180, 192, 512]) writeFileSync(`icons/icon-${s}.png`, render(s));
+// Android adaptive icon: everything must sit inside the central 80% circle, so draw smaller.
+writeFileSync('icons/icon-maskable-512.png', render(512, 0.28, 0.049));
 console.log('icons written');

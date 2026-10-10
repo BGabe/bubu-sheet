@@ -99,15 +99,19 @@ function checkView(state, redraw, ctx) {
   const outcome = res ? resultCard(sel, res, state, ctx, redraw)
     : h('section', { class: 'result' }, h('div', { class: 'muted small' }, 'TOTAL'), h('div', { class: 'total' }, '–'),
       h('div', { class: 'parts' }, `Tap the number${need > 1 ? 's' : ''} you rolled`));
-  const panel = h('section', { class: 'card stack' },
-    sel.kind !== 'death' ? segmented([['normal', 'Normal'], ['adv', 'Advantage'], ['dis', 'Disadvantage']], S.mode, (m) => { S.mode = m; redraw(); }) : null,
-    outcome,
-    h('div', null, h('div', { class: 'muted small' }, need === 1 ? 'Your d20' : 'First d20'), keypad(20, S.d[0], setDie(0))),
-    need === 2 ? h('div', null, h('div', { class: 'muted small' }, 'Second d20'), keypad(20, S.d[1], setDie(1))) : null,
-    sel.kind !== 'death' ? h('div', null,
-      h('div', { class: 'muted small' }, 'Extra die to add (Bardic Inspiration d8, Guidance…) — optional'),
-      keypad(12, S.extra, (v) => { S.extra = v; redraw(); }, 'dim')) : null,
-    h('div', { class: 'row end' }, h('button', { class: 'btn small', onClick: () => { resetDice(); redraw(); } }, 'Clear dice')));
+  // Two groups so a phone held sideways can show the result beside the keypad.
+  const panel = h('section', { class: 'card' },
+    h('div', { class: 'roll-grid' },
+      h('div', { class: 'stack' },
+        sel.kind !== 'death' ? segmented([['normal', 'Normal'], ['adv', 'Advantage'], ['dis', 'Disadvantage']], S.mode, (m) => { S.mode = m; redraw(); }) : null,
+        outcome),
+      h('div', { class: 'stack' },
+        h('div', null, h('div', { class: 'muted small' }, need === 1 ? 'Your d20' : 'First d20'), keypad(20, S.d[0], setDie(0))),
+        need === 2 ? h('div', null, h('div', { class: 'muted small' }, 'Second d20'), keypad(20, S.d[1], setDie(1))) : null,
+        sel.kind !== 'death' ? h('div', null,
+          h('div', { class: 'muted small' }, 'Extra die to add (Bardic Inspiration d8, Guidance…) — optional'),
+          keypad(12, S.extra, (v) => { S.extra = v; redraw(); }, 'dim')) : null,
+        h('div', { class: 'row end' }, h('button', { class: 'btn small', onClick: () => { resetDice(); redraw(); } }, 'Clear dice')))));
 
   return h('div', { class: 'stack' }, picker, S.picking ? null : panel);
 }

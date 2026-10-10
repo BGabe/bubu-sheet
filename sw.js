@@ -1,6 +1,6 @@
 // Cache-first service worker. Bump CACHE whenever any shipped file changes so
 // installed copies pick up the update the next time the app is opened online.
-const CACHE = 'bubu-v2';
+const CACHE = 'bubu-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -21,6 +21,7 @@ const ASSETS = [
   'icons/icon-180.png',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'icons/icon-maskable-512.png',
 ];
 
 self.addEventListener('install', (event) => {
