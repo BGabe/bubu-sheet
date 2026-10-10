@@ -164,11 +164,11 @@ export const FEATURES = [
   },
   {
     key: 'darkOnesBlessing', name: 'Dark One\'s Blessing', source: 'Warlock (Fiend)', tempHp: 5,
-    text: 'When you reduce a hostile creature to 0 HP, you gain temporary HP equal to your CHA modifier + Warlock level (4 + 1 = 5).',
+    text: 'When you reduce a hostile creature to 0 HP, you gain temporary HP equal to your CHA modifier + Warlock level (4 + 1 = 5). Tap the button below right after you drop an enemy. Temp HP do not stack (keep the higher number) and last until used up or a long rest.',
   },
   {
     key: 'pactMagic', name: 'Pact Magic', source: 'Warlock',
-    text: 'One 1st-level pact slot, restored on a short or long rest. You can cast any spell you know using either pact slots or Bard slots. Spells you know from either class use Charisma.',
+    text: 'Warlock slots are called pact slots. You have 1, and it is 1st level. It comes back on a short rest (Bard slots need a long rest). Either kind of slot can cast any spell you know, Bard or Warlock; the slot only has to be high enough in level. Tip: spend the pact slot first. See Warlock 101 for more.',
   },
   {
     key: 'inspiringLeader', name: 'Inspiring Leader (feat)', source: 'Feat', uses: { max: 1, rest: 'short' }, tempHp: 10,
@@ -189,6 +189,54 @@ export const FEATURES = [
   {
     key: 'proficiencies', name: 'Proficiencies & Languages', source: 'Misc',
     text: 'Armor: light, medium. Weapons: battleaxe, handaxe, light hammer, warhammer, simple weapons, hand crossbow, longsword, rapier, shortsword. Tools: Brewer\'s Supplies. Languages: Common, Dwarvish. Darkvision 60 ft.',
+  },
+];
+
+// Plain-language Warlock help (5e PHB rules). Bubu is Warlock 1 / Bard 5.
+export const WARLOCK_GUIDE = [
+  {
+    q: 'What is a pact slot?',
+    a: `A spell slot is the "fuel" for casting a spell of 1st level or higher. Cantrips (Eldritch Blast, Poison Spray, Vicious Mockery, Mage Hand) cost nothing. As a Warlock you have Pact Magic: a small number of slots that are all the same level. Right now that is 1 slot of 1st level. You tap it off on the Sheet or when you cast.`,
+  },
+  {
+    q: 'How is it different from my Bard slots?',
+    a: `You have two separate fuel tanks. Your Bard slots (four 1st, three 2nd, two 3rd) only come back after a long rest (a night's sleep). Your pact slot is tiny, but it comes back after a short rest (about an hour of downtime). The pact slot is NOT counted when working out your Bard slots; they are simply added on top.`,
+  },
+  {
+    q: 'Which spells can I cast with each?',
+    a: `Either tank can cast any spell you know, Bard spell or Warlock spell. What matters is the slot's level. Your pact slot is 1st level, so it can only power 1st-level spells (Charm Person, Cure Wounds, Burning Hands, Command, Armor of Agathys, Detect Magic, Disguise Self). Enhance Ability (2nd) and Enemies Abound (3rd) need a Bard slot of that level. Casting a 1st-level spell with a higher slot "upcasts" it for extra effect (Burning Hands gets +1d6 per level, Cure Wounds +1d8).`,
+  },
+  {
+    q: 'Which slot should I spend first?',
+    a: `Spend the pact slot first on a 1st-level spell, because it refills on a short rest and your Bard slots do not. Keep the Bard slots for 2nd and 3rd-level spells. The Cast button already puts the pact slot at the top when it fits. Also handy: Font of Inspiration lets you spend ANY spell slot, the pact slot included, to get one Bardic Inspiration use back with no action.`,
+  },
+  {
+    q: 'What counts as a short rest?',
+    a: `At least one hour of quiet: eating, bandaging, talking, resting. Tap "Short rest" on the Sheet and it refills the pact slot and your Bardic Inspiration. It does NOT refill Bard spell slots or HP by itself; to heal on a short rest, spend Hit Dice (you have six d8s). A long rest (8 hours) refills everything.`,
+  },
+  {
+    q: 'What is a patron? What does The Fiend do?',
+    a: `A Warlock's magic comes from a deal with a powerful being, the patron. Yours is a fiend (think devil or demon). It gives you Dark One's Blessing, and it adds Fiend-flavoured spells to the list you can pick from: Burning Hands and Command at your level now, then Scorching Ray, Fireball, Fire Shield and others as you gain higher slots. Pacts usually have a price or a favour attached, so ask your DM what your patron wants from Bubu.`,
+  },
+  {
+    q: "How does Dark One's Blessing work?",
+    a: `When you reduce a hostile creature to 0 hit points, you gain temporary hit points equal to your Charisma modifier plus your Warlock level: 4 + 1 = 5. After you drop an enemy, open Spells > Features and tap "Gain 5 temp HP". Temp HP soak damage before your real HP, do not stack (keep the bigger number), and last until used up or until a long rest.`,
+  },
+  {
+    q: 'Warlock level or total level?',
+    a: `Your pact slots and Fiend features follow your WARLOCK level (1), not your total level (6). That is why you have just one slot, and why Dark One's Own Luck (add a d10 to a check or save, once per rest) is far away: it needs Warlock level 6. Cantrips like Eldritch Blast and Poison Spray do grow with your TOTAL level, which is why Eldritch Blast already fires 2 beams.`,
+  },
+  {
+    q: 'Eldritch Blast and Poison Spray: do they cost slots?',
+    a: `No. Cantrips are free and unlimited. Eldritch Blast: 2 beams of 1d10 force, each its own spell attack roll (+7). Poison Spray: 2d12 poison, the target makes a Constitution save against DC 15 (short range: 10 ft). Use them whenever you do not want to spend a slot.`,
+  },
+  {
+    q: 'If I take another Warlock level, what changes?',
+    a: `Warlock 2: you get 2 pact slots (still 1st level) and 2 Eldritch Invocations, permanent upgrades you pick. Popular ones: Agonizing Blast (adds your Charisma modifier to every Eldritch Blast hit, +4 per beam for you), Repelling Blast (pushes a target 10 ft back) and Devil's Sight. Warlock 3: your pact slots become 2nd level and you choose a Pact Boon (Blade, Chain, Tome or Talisman). Ask your DM which options your table allows.`,
+  },
+  {
+    q: 'How many Warlock spells should I know?',
+    a: `A level 1 Warlock knows 2 spells plus 2 cantrips (you have Eldritch Blast and Poison Spray). Your sheet lists three Warlock-style spells (Burning Hands, Command, Armor of Agathys), so it is worth double-checking with your DM which ones are your Warlock picks. It does not change how they are cast.`,
   },
 ];
 

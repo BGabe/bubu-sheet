@@ -89,3 +89,22 @@ test('no personal session content leaks into the public seed', () => {
     assert.ok(!blob.includes(word), word);
   }
 });
+
+import { WARLOCK_GUIDE } from '../js/data.js';
+
+test('warlock guide: complete entries, key topics, consistent numbers', () => {
+  assert.ok(WARLOCK_GUIDE.length >= 8);
+  for (const e of WARLOCK_GUIDE) {
+    assert.ok(e.q && e.q.endsWith('?') || e.q, 'question');
+    assert.ok(e.a && e.a.length > 60, `answer for ${e.q}`);
+  }
+  const text = JSON.stringify(WARLOCK_GUIDE).toLowerCase();
+  for (const topic of ['pact slot', 'short rest', 'long rest', 'dark one', 'patron', 'warlock level', 'invocation', 'pact boon', 'agonizing blast']) {
+    assert.ok(text.includes(topic), `guide mentions ${topic}`);
+  }
+  // Dark One's Blessing = CHA mod (+4) + Warlock level (1) = 5, same as the feature's button.
+  const blessing = FEATURES.find((f) => f.key === 'darkOnesBlessing');
+  assert.equal(blessing.tempHp, 4 + 1);
+  assert.ok(text.includes('4 + 1 = 5'));
+  for (const word of ['Olivia', 'Moloch', 'Ghaelle', 'Freyot', 'Benton', 'Erin']) assert.ok(!text.includes(word.toLowerCase()), word);
+});

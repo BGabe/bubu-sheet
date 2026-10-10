@@ -3,6 +3,7 @@ import { CHAR, FEATURES, ABILITY_NAMES } from '../data.js';
 import { ABILITIES, abilityMod, profBonus, adjustHp, shortRest, longRest, applyMisc, skillBonus } from '../rules.js';
 import { buildChecks } from '../checks.js';
 import { inspirationButtons } from './inspiration.js';
+import { pactInfoButton } from './warlock.js';
 
 let editSkills = false;
 
@@ -66,7 +67,7 @@ export function render(root, ctx) {
       }, s.heroicInspiration ? '★ DM Inspiration ready — reroll any roll. Tap to spend' : '☆ DM Inspiration: none. Tap when the DM grants it'),
       [1, 2, 3].map((l) => resRow(`Bard slot — level ${l}`,
         pips(s.slots.bard[l].cur, s.slots.bard[l].max, (v) => store.update((st) => { st.slots.bard[l].cur = v; })), `${s.slots.bard[l].cur}/${s.slots.bard[l].max}`)),
-      resRow('Pact slot — level 1', pips(s.slots.pact.cur, s.slots.pact.max, (v) => store.update((st) => { st.slots.pact.cur = v; })), `${s.slots.pact.cur}/${s.slots.pact.max} · short rest`),
+      resRow(h('span', null, 'Pact slot — level 1', pactInfoButton(ctx)), pips(s.slots.pact.cur, s.slots.pact.max, (v) => store.update((st) => { st.slots.pact.cur = v; })), `${s.slots.pact.cur}/${s.slots.pact.max} · short rest`),
       resRow('Hit Dice (d8)', pips(s.hitDice.cur, s.hitDice.max, (v) => store.update((st) => { st.hitDice.cur = v; })), `${s.hitDice.cur}/${s.hitDice.max}`),
       h('button', {
         class: 'btn', disabled: s.hitDice.cur <= 0,
@@ -118,7 +119,7 @@ export function render(root, ctx) {
     h('div', { class: 'cols' },
       h('div', { class: 'stack' }, hpCard, combatCard, resources),
       h('div', { class: 'stack' }, abilities, saves, skills)),
-    featureStrip()));
+    featureStrip(ctx)));
 }
 
 function resRow(label, control, right) {
@@ -127,7 +128,7 @@ function resRow(label, control, right) {
     control);
 }
 
-function featureStrip() {
+function featureStrip(ctx) {
   const group = (title, items) => [
     h('h3', { style: 'margin-top:8px' }, title),
     h('ul', { style: 'margin:0;padding-left:1.1em' }, items.map((t) => h('li', null, t))),
@@ -152,9 +153,10 @@ function featureStrip() {
     ]),
     ...group('Warlock and general', [
       "Dark One's Blessing: drop an enemy to 0 HP and gain 5 temp HP.",
-      'Pact slot comes back on a short rest.',
+      'Pact slot: your Warlock spell fuel (1 slot, 1st level). It refills on a short rest, so spend it first.',
       'Concentration: if you take damage, make a CON save, DC 10 or half the damage (higher).',
-    ]));
+    ]),
+    h('button', { class: 'btn block', style: 'margin-top:12px', onClick: () => ctx.go('spells', { filter: 'warlock' }) }, 'Warlock 101: pact slots explained →'));
 }
 
 function hpModal(ctx) {

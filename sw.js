@@ -1,6 +1,6 @@
 // Cache-first service worker. Bump CACHE whenever any shipped file changes so
 // installed copies pick up the update the next time the app is opened online.
-const CACHE = 'bubu-v3';
+const CACHE = 'bubu-v4';
 const ASSETS = [
   './',
   'index.html',
@@ -18,6 +18,7 @@ const ASSETS = [
   'js/ui/roll.js',
   'js/ui/sheet.js',
   'js/ui/spells.js',
+  'js/ui/warlock.js',
   'icons/icon-180.png',
   'icons/icon-192.png',
   'icons/icon-512.png',

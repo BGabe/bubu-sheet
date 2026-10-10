@@ -2,6 +2,7 @@ import { h, pips, modal, segmented } from '../dom.js';
 import { CHAR, SPELLS, FEATURES } from '../data.js';
 import { abilityMod, profBonus, spellEffect, spendSlot } from '../rules.js';
 import { inspirationButtons } from './inspiration.js';
+import { warlockGuide, pactInfoButton } from './warlock.js';
 
 const open = new Set(); // expanded spell / feature keys survive re-renders
 let filter = 'all';
@@ -9,8 +10,9 @@ let filter = 'all';
 const LEVEL_NAMES = ['Cantrips', '1st level', '2nd level', '3rd level'];
 const SAVE_NAMES = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
 
-export function render(root, ctx) {
+export function render(root, ctx, params) {
   const { store } = ctx;
+  if (params && params.filter) filter = params.filter;
   const s = store.get();
   const pb = profBonus(CHAR.level);
   const cha = abilityMod(CHAR.abilities.cha);
@@ -27,12 +29,14 @@ export function render(root, ctx) {
       h('button', { class: 'btn small', onClick: () => store.update((st) => { st.concentration = null; }) }, 'End concentration')) : null,
     h('div', { class: 'stack', style: 'margin-top:12px' },
       [1, 2, 3].map((l) => slotRow(`Level ${l} slots`, s.slots.bard[l], (v) => store.update((st) => { st.slots.bard[l].cur = v; }))),
-      slotRow('Pact slot (level 1)', s.slots.pact, (v) => store.update((st) => { st.slots.pact.cur = v; }))));
+      slotRow(h('span', null, 'Pact slot (level 1)', pactInfoButton(ctx)), s.slots.pact, (v) => store.update((st) => { st.slots.pact.cur = v; }))));
 
-  const filters = segmented([['all', 'All'], ['0', 'Cantrips'], ['1', '1st'], ['2', '2nd'], ['3', '3rd'], ['features', 'Features']], filter, (v) => { filter = v; ctx.rerender(); });
+  const filters = segmented([['all', 'All'], ['0', 'Cantrips'], ['1', '1st'], ['2', '2nd'], ['3', '3rd'], ['features', 'Features'], ['warlock', 'Warlock 101']], filter, (v) => { filter = v; ctx.rerender(); });
 
   const body = [];
-  if (filter === 'features') {
+  if (filter === 'warlock') {
+    body.push(warlockGuide(ctx));
+  } else if (filter === 'features') {
     body.push(...FEATURES.map((f) => featureCard(f, ctx)));
   } else {
     const levels = filter === 'all' ? [0, 1, 2, 3] : [Number(filter)];
@@ -100,11 +104,15 @@ function castFlow(sp, ctx) {
   }
   if (s.slots.pact.cur > 0 && s.slots.pact.level >= sp.level) options.push({ pool: 'pact', level: s.slots.pact.level, left: s.slots.pact.cur });
 
+  // The pact slot refills on a short rest, so offer it first when it can cast this spell.
+  options.sort((a, b) => (b.pool === 'pact') - (a.pool === 'pact'));
+  const pactFits = options.some((o) => o.pool === 'pact');
+
   modal(`Cast ${sp.name}`, (close) => {
     if (!options.length) return h('div', { class: 'stack' }, h('p', null, 'No spell slots left that can cast this.'), h('button', { class: 'btn', onClick: close }, 'Close'));
     return h('div', { class: 'stack' },
       s.concentration && sp.conc ? h('p', { class: 'badge bad' }, 'You are already concentrating — casting this ends the other spell.') : null,
-      h('p', { class: 'muted' }, 'Which slot do you spend?'),
+      h('p', { class: 'muted' }, pactFits ? 'Which slot do you spend? The pact slot is the best pick: it refills on a short rest.' : 'Which slot do you spend?'),
       options.map((o) => h('button', {
         class: 'btn block', onClick: () => {
           close();
@@ -115,7 +123,7 @@ function castFlow(sp, ctx) {
           });
           if (ok) afterCast(sp, o.level, ctx, `${o.pool === 'pact' ? 'Pact slot' : `Level ${o.level} slot`} spent`);
         },
-      }, `${o.pool === 'pact' ? 'Pact slot' : 'Bard slot'} — level ${o.level}${o.level > sp.level ? ' (upcast)' : ''}  ·  ${o.left} left`)),
+      }, `${o.pool === 'pact' ? 'Pact slot' : 'Bard slot'} — level ${o.level}${o.level > sp.level ? ' (upcast)' : ''}  ·  ${o.left} left${o.pool === 'pact' ? '  ·  recommended' : ''}`)),
       h('button', { class: 'btn ghost', onClick: close }, 'Cancel'));
   });
 }
